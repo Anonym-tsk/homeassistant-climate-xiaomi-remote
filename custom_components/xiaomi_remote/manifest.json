@@ -1,5 +1,5 @@
 {
-  "domain": "xiaomi_remote_climate",
+  "domain": "xiaomi_remote",
   "name": "Xiaomi Remote Climate",
   "documentation": "https://github.com/Anonym-tsk/home-assistant-components/blob/master/README.md",
   "dependencies": ["remote"],
