@@ -368,8 +368,8 @@ class RemoteClimate(ClimateDevice, RestoreEntity):
         state = await self.async_get_last_state()
 
         if state is not None:
+            self._current_hvac_mode = state.state
             self._last_hvac_mode = state.attributes.get(ATTR_LAST_HVAC_MODE, self._default_hvac_mode)
-            self._current_hvac_mode = state.attributes.get(ATTR_HVAC_MODE, self._last_hvac_mode)
             self._last_fan_mode = state.attributes.get(ATTR_LAST_FAN_MODE, self._default_fan_mode)
             self._current_fan_mode = state.attributes.get(ATTR_FAN_MODE, self._last_fan_mode)
             self._last_preset_mode = state.attributes.get(ATTR_LAST_PRESET_MODE, self._default_preset_mode)
