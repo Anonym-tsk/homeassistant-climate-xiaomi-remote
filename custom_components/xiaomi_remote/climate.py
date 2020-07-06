@@ -2,7 +2,7 @@ import logging
 import voluptuous as vol
 import homeassistant.helpers.config_validation as cv
 
-from homeassistant.components.climate import ClimateDevice, PLATFORM_SCHEMA
+from homeassistant.components.climate import ClimateEntity, PLATFORM_SCHEMA
 from homeassistant.components.climate.const import (
     HVAC_MODE_HEAT, HVAC_MODE_COOL, HVAC_MODE_AUTO, HVAC_MODE_OFF,
     FAN_LOW, FAN_MEDIUM, FAN_HIGH, FAN_AUTO,
@@ -102,7 +102,7 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     ])
 
 
-class RemoteClimate(ClimateDevice, RestoreEntity):
+class RemoteClimate(ClimateEntity, RestoreEntity):
     def __init__(self, hass, name, remote_entity_id, commands, min_temp, max_temp, target_temp, target_temp_step,
                  hvac_modes, fan_modes, preset_modes, default_hvac_mode, default_fan_mode, default_preset_mode,
                  temp_entity_id, power_template):

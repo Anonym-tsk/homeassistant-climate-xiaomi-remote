@@ -1,0 +1,5 @@
+{
+  "name": "Xiaomi IR Climate",
+  "domains": "climate",
+  "iot_class": "Local Polling"
+}
