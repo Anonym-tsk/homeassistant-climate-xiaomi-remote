@@ -10,7 +10,7 @@
 | `commands` | yes | Commands list (see below) |
 | `name` | no | Name of climate component |
 | `temp_sensor` | no | **entity_id** for a temperature sensor, **temp_sensor.state must be temperature** |
-| `power_template` | no | **template** that returns status of climete, **must returns boolean value** |
+| `power_template` | no | **template** that returns status of climate, **must returns boolean value** |
 | `min_temp` | no | Set minimum available temperature (default: 16) |
 | `max_temp` | no | Set maximum available temperature (default: 32) |
 | `target_temp` | no | Set initial target temperature (default: 24) |

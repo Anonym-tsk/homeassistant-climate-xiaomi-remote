@@ -17,7 +17,8 @@ from homeassistant.const import (
     STATE_UNAVAILABLE, STATE_UNKNOWN)
 from homeassistant.core import callback
 from homeassistant.exceptions import TemplateError
-from homeassistant.helpers.event import async_track_state_change
+from homeassistant.helpers.event import TrackTemplate, async_track_template_result, async_track_state_change
+from homeassistant.helpers.template import result_as_boolean
 from homeassistant.helpers.restore_state import RestoreEntity
 
 _LOGGER = logging.getLogger(__name__)
@@ -146,17 +147,21 @@ class RemoteClimate(ClimateEntity, RestoreEntity):
             async_track_state_change(hass, temp_entity_id, self._async_temp_changed)
 
         if power_template:
-            power_template.hass = hass
-            power_entity_ids = power_template.extract_entities()
-            async_track_state_change(hass, power_entity_ids, self._async_power_changed)
+            result = async_track_template_result(
+                self.hass,
+                [TrackTemplate(power_template, None)],
+                self._async_power_changed,
+            )
+            result.async_refresh()
+            self.async_on_remove(result.async_remove)
 
-    async def _async_temp_changed(self, entity_id, old_state, new_state):
+    def _async_temp_changed(self, entity_id, old_state, new_state):
         """Update current temperature."""
         if new_state is None or new_state.state in [STATE_UNKNOWN, STATE_UNAVAILABLE]:
             return
 
         self._async_update_temp(new_state)
-        await self.async_update_ha_state()
+        self.schedule_update_ha_state()
 
     @callback
     def _async_update_temp(self, state):
@@ -166,24 +171,15 @@ class RemoteClimate(ClimateEntity, RestoreEntity):
         except ValueError as ex:
             _LOGGER.error("Unable to update from sensor: %s", ex)
 
-    async def _async_power_changed(self, entity_id, old_state, new_state):
+    def _async_power_changed(self, event, updates):
         """Update current power."""
-        if new_state is None:
-            return
+        result = updates.pop().result
 
-        self._async_update_power()
-        await self.async_update_ha_state()
-
-    @callback
-    def _async_update_power(self):
-        """Update power with latest state from template."""
-        try:
-            if self._power_template.async_render().lower() not in ('true', 'on', '1'):
-                self._current_hvac_mode = HVAC_MODE_OFF
-            else:
-                self._current_hvac_mode = self._last_hvac_mode
-        except TemplateError as ex:
-            _LOGGER.warning('Unable to update power from template: %s', ex)
+        if isinstance(result, TemplateError):
+            _LOGGER.warning('Unable to update power from template: %s', result)
+        else:
+            self._current_hvac_mode = self._last_hvac_mode if result_as_boolean(result) else HVAC_MODE_OFF
+            self.schedule_update_ha_state()
 
     @property
     def should_poll(self):
@@ -384,9 +380,6 @@ class RemoteClimate(ClimateEntity, RestoreEntity):
             temp_state = self.hass.states.get(self._temp_entity_id)
             if temp_state and temp_state.state not in [STATE_UNKNOWN, STATE_UNAVAILABLE]:
                 self._async_update_temp(temp_state)
-
-        if self._power_template:
-            self._async_update_power()
 
         self._update_flags_get_command()
         await self.async_update_ha_state(True)
