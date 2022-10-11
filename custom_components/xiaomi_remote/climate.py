@@ -28,6 +28,9 @@ CONF_TEMP_SENSOR = 'temp_sensor'
 CONF_POWER_TEMPLATE = 'power_template'
 CONF_TARGET_TEMP = 'target_temp'
 CONF_COMMANDS = 'commands'
+CONF_DOMAIN = 'domain'
+CONF_SERVICE = 'service'
+CONF_PREFIX = 'prefix'
 
 DEFAULT_NAME = 'Xiaomi Remote Climate'
 DEFAULT_MIN_TEMP = 16
@@ -40,6 +43,7 @@ DEFAULT_PRESET_MODES = []
 DEFAULT_HVAC_MODE = HVAC_MODE_OFF
 DEFAULT_FAN_MODE = FAN_AUTO
 DEFAULT_PRESET_MODE = None
+DEFAULT_PREFIX = 'raw:'
 
 ATTR_LAST_HVAC_MODE = 'last_hvac_mode'
 ATTR_LAST_FAN_MODE = 'last_fan_mode'
@@ -72,7 +76,10 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Optional(ATTR_FAN_MODE, default=DEFAULT_FAN_MODE): cv.string,
     vol.Optional(ATTR_PRESET_MODE, default=DEFAULT_PRESET_MODE): vol.Maybe(cv.string),
     vol.Optional(CONF_CUSTOMIZE, default={}): CUSTOMIZE_SCHEMA,
-    vol.Required(CONF_COMMANDS): COMMANDS_SCHEMA
+    vol.Required(CONF_COMMANDS): COMMANDS_SCHEMA,
+    vol.Optional(CONF_DOMAIN, default=DOMAIN): cv.string,
+    vol.Optional(CONF_SERVICE, default=SERVICE_SEND_COMMAND): cv.string,
+    vol.Optional(CONF_PREFIX, default=DEFAULT_PREFIX): cv.string,
 })
 
 
@@ -81,6 +88,9 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     name = config.get(CONF_NAME)
     remote_entity_id = config.get(CONF_REMOTE)
     commands = config.get(CONF_COMMANDS)
+    domain = config.get(CONF_DOMAIN)
+    service = config.get(CONF_SERVICE)
+    prefix = config.get(CONF_PREFIX)
 
     min_temp = config.get(ATTR_MIN_TEMP)
     max_temp = config.get(ATTR_MAX_TEMP)
@@ -99,20 +109,23 @@ async def async_setup_platform(hass, config, async_add_entities, discovery_info=
     async_add_entities([
         RemoteClimate(hass, name, remote_entity_id, commands, min_temp, max_temp, target_temp, target_temp_step,
                       hvac_modes, fan_modes, preset_modes, default_hvac_mode, default_fan_mode, default_preset_mode,
-                      temp_entity_id, power_template)
+                      temp_entity_id, power_template, domain, service, prefix)
     ])
 
 
 class RemoteClimate(ClimateEntity, RestoreEntity):
     def __init__(self, hass, name, remote_entity_id, commands, min_temp, max_temp, target_temp, target_temp_step,
                  hvac_modes, fan_modes, preset_modes, default_hvac_mode, default_fan_mode, default_preset_mode,
-                 temp_entity_id, power_template):
+                 temp_entity_id, power_template, domain, service, prefix):
         """Representation of a Xiaomi Remote Climate device."""
 
         self.hass = hass
         self._name = name
         self._remote_entity_id = remote_entity_id
         self._commands = commands
+        self._domain = domain
+        self._service = service
+        self._prefix = prefix
 
         self._min_temp = min_temp
         self._max_temp = max_temp
@@ -299,8 +312,8 @@ class RemoteClimate(ClimateEntity, RestoreEntity):
         """Send IR code to device."""
         command = self._update_flags_get_command()
         if command is not None:
-            self.hass.services.call(DOMAIN, SERVICE_SEND_COMMAND, {
-                ATTR_COMMAND: 'raw:' + command,
+            self.hass.services.call(self._domain, self._service, {
+                ATTR_COMMAND: self._prefix + command,
                 ATTR_ENTITY_ID: self._remote_entity_id
             })
 
@@ -311,8 +324,8 @@ class RemoteClimate(ClimateEntity, RestoreEntity):
             preset_mode = self._current_preset_mode.lower()
         try:
             command = self._commands[COMMAND_PRESET_MODES][preset_mode]
-            self.hass.services.call(DOMAIN, SERVICE_SEND_COMMAND, {
-                ATTR_COMMAND: 'raw:' + command,
+            self.hass.services.call(self._domain, self._service, {
+                ATTR_COMMAND: self._prefix + command,
                 ATTR_ENTITY_ID: self._remote_entity_id
             })
         except KeyError:
