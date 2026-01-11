@@ -1,0 +1,15 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "description": "Configure the remote to use for learning IR commands."
+      },
+      "init": {
+        "description": "Input parameters to trigger IR learn mode."
+      }
+    },
+    "error": {
+      "cannot_learn": "Failed to initiate learn command. Check entity or connectivity."
+    }
+  }
+}

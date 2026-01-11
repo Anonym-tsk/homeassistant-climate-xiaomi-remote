@@ -1,0 +1,33 @@
+ 
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Xiaomi IR Climate Setup",
+        "description": "Configure your AC settings and link the remote."
+      }
+    },
+    "error": {
+      "call_failed": "Failed to call remote service."
+    },
+    "abort": {
+      "already_configured": "Device is already configured"
+    }
+  },
+  "options": {
+    "step": {
+      "menu": {
+        "title": "IR Code Management",
+        "description": "What would you like to do?"
+      },
+      "trigger_learn": {
+        "title": "Learn Command",
+        "description": "{info}"
+      },
+      "add_code": {
+        "title": "Save IR Code",
+        "description": "{info}"
+      }
+    }
+  }
+}

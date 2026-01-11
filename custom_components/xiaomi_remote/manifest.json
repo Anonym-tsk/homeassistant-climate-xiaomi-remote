@@ -1,10 +1,15 @@
+ 
 {
-  "domain": "xiaomi_remote",
-  "name": "Xiaomi Remote Climate",
-  "documentation": "https://github.com/Anonym-tsk/home-assistant-components/blob/master/README.md",
-  "dependencies": ["remote"],
-  "codeowners": ["@anonym-tsk"],
-  "version": 0,
+  "domain": "xiaomi_ir_climate",
+  "name": "Xiaomi IR Climate (UI)",
+  "version": "1.0.0",
+  "config_flow": true,
+  "documentation": "https://github.com/Anonym-tsk/homeassistant-climate-xiaomi-remote",
   "requirements": [],
-  "homeassistant": "0.96.0"
+  "dependencies": [
+    "remote",
+    "climate"
+  ],
+  "codeowners": [],
+  "iot_class": "local_polling"
 }

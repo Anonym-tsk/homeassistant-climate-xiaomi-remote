@@ -1,0 +1,12 @@
+learn_command:
+  description: "Learns an IR command from Xiaomi remote"
+  fields:
+    slot:
+      description: "IR Slot number"
+      example: 1
+    timeout:
+      description: "Timeout in seconds"
+      example: 10
+    label:
+      description: "Custom label for this command"
+      example: "Power"

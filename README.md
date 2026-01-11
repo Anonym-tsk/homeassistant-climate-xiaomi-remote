@@ -1,98 +1,62 @@
-## Xiaomi IR Climate Component for Home Assistant
+ 
+# Xiaomi IR Climate (UI Version)
 
-#### Requirements
-[Xiaomi IR Remote](https://www.home-assistant.io/components/remote.xiaomi_miio/) component need to be enabled and configured
+A custom Home Assistant integration for controlling air conditioners via Xiaomi IR Remotes (Chuangmi/Miot). 
 
-#### Configuration variables:
-| Variable |  Required  | Description |
-| -------- | ---------- | ----------- |
-| `remote` | yes | **entity_id** of the Xiaomi IR Remote device |
-| `commands` | yes | Commands list (see below) |
-| `name` | no | Name of climate component |
-| `temp_sensor` | no | **entity_id** for a temperature sensor, **temp_sensor.state must be temperature** |
-| `power_template` | no | **template** that returns status of climate, **must returns boolean value** |
-| `min_temp` | no | Set minimum available temperature (default: 16) |
-| `max_temp` | no | Set maximum available temperature (default: 32) |
-| `target_temp` | no | Set initial target temperature (default: 24) |
-| `target_temp_step` | no | Set target temperature step (default: 1) |
-| `hvac_mode` | no | Set initial default operation mode (default: off) |
-| `fan_mode` | no | Set initial default fan mode (default: auto) |
-| `customize`<br/>`- hvac_modes`<br/>`- fan_modes`<br/>`- preset_modes` | no | List of options to customize<br/>- List of operation modes (default: off, heat, cool, auto)<br/>- List of fan modes (default: low, medium, high, auto)<br/>- List of preset modes |
+**🚀 Now featuring a full UI Config Flow & Magic Auto-Learning!** No more editing complex YAML files. You can now set up your AC and learn IR codes directly from the Home Assistant interface.
 
-#### Basic Example:
-```
-climate:
-  - platform: xiaomi_remote
-    name: Air Conditioner
-    remote: remote.xiaomi_miio_192_168_10_101
-    commands: !include Roda-YKR-H-102E.yaml
-```
+## ✨ Features
+* **100% UI Configuration:** Set up your climate entity, min/max temps, and supported modes via the Integrations page.
+* **Magic Auto-Learning:** The integration listens for the Xiaomi "learned code" notification and **automatically fills the IR code** for you.
+* **Unified Editor:** Trigger learning, capture codes, and save them all from a single screen.
+* **Smart Defaults:** Remembers your last used Mode/Fan/Temp so you can quickly map out your entire remote control.
 
-#### Custom Example:
-```
-climate:
-  - platform: xiaomi_remote
-    name: Air Conditioner
-    remote: remote.xiaomi_miio_192_168_10_101
-    commands: !include Roda-YKR-H-102E.yaml
-    temp_sensor: sensor.co2mon_temperature
-    power_template: "{{ states('sensor.plug_power_158d0002366887') | float > 50 }}"
-    min_temp: 16
-    max_temp: 32
-    target_temp: 24
-    target_temp_step: 1
-    hvac_mode: 'off'
-    fan_mode: auto
-    customize:
-      hvac_modes:
-        - 'off'
-        - cool
-        - heat
-        - dry
-        - fan_only
-        - auto
-      fan_modes:
-        - low
-        - medium
-        - high
-        - auto
-      preset_modes:
-        - eco
-        - away
-        - boost
-        - comfort
-        - home
-        - sleep
-```
+## 📦 Installation
 
-#### How to make your configuration YAML file
-* Use [`remote.xiaomi_miio_learn_command`](https://www.home-assistant.io/components/remote.xiaomi_miio/#remotexiaomi_miio_learn_command) to get commands from your remote.
-* Create YAML file same as `Roda-YKR-H-102E.yaml` with your commands.
-  * Required command `off` (`'off': <command>`)
-  * Optional commands `presets/preset_mode` (`presets/'off': <command>`, `presets/eco: <command>`)
-  * Optional commands: `operation/fan_mode/temperature` (available nesting: `operation/fan_mode/temperature`, `operation/fan_mode`, `operation`)
-  * `'off'` commands must be in quotes
+1.  Download this repository.
+2.  Copy the `xiaomi_ir_climate` folder into your Home Assistant `custom_components` directory.
+    * Path: `/config/custom_components/xiaomi_ir_climate/`
+3.  **Restart Home Assistant**.
 
-Example:
-```
-'off': <raw_command>
-cool:
-  low:
-    16: <raw_command>
-    17: <raw_command>
-    ...
-heat:
-  low: <raw_command>
-  high: <raw_command>
-dry: <raw_command>
-presets:
-  'off': <raw_command>
-  eco: <raw_command>
-  sleep: <raw_command>
-```
+## ⚙️ Setup
+
+1.  Go to **Settings** > **Devices & Services**.
+2.  Click **+ ADD INTEGRATION**.
+3.  Search for **Xiaomi IR Climate (UI)**.
+4.  Fill in the basic details:
+    * **Name:** e.g., "Bedroom AC"
+    * **Remote Entity:** Select your Xiaomi remote (e.g., `remote.xiaomi_miio_...`).
+    * **Min/Max Temp:** Set the range your AC supports (e.g., 16-30).
+    * **Modes:** Select the HVAC and Fan modes your AC supports.
+5.  Click **Submit**.
+
+## 🎮 How to Learn Codes (The Easy Way)
+
+Once the entity is created, you need to teach it the IR codes for your specific AC.
+
+1.  Go to **Settings** > **Devices & Services** > **Xiaomi IR Climate**.
+2.  Click the **CONFIGURE** button on the integration entry.
+3.  **Select the State:** Choose the combination you want to learn (e.g., **Cool**, **24°C**, **Auto Fan**).
+4.  **Check the Box:** ☑️ `Trigger Remote Learning`.
+5.  Click **Submit**.
+6.  **Point & Shoot:**
+    * The form will go into a "Loading" state.
+    * Your Xiaomi Remote usually beeps (indicating learning mode).
+    * Point your physical AC remote at the Xiaomi device and press the corresponding button (Cool 24° Auto).
+7.  **Auto-Fill Magic:**
+    * The integration will detect the code from the notification.
+    * The screen will reload with the **IR Code automatically filled in**.
+8.  **Save:** Click **Submit** again to save that code to the database.
+
+> **Pro Tip:** The form remembers your last setting. After saving "Cool 24°", it will reopen on "Cool". You just need to change the temp to "25°", check "Trigger Learning", and repeat!
+
+## 🛠 Troubleshooting
+
+* **"Call Failed" Error:** This usually means the integration couldn't talk to your remote. Ensure your `remote.xiaomi_...` entity is available and working.
+* **Timeout / Code not filling:**
+    * Ensure you press the remote button within 30 seconds.
+    * Check your Home Assistant **Notifications** (Bell icon). If the code appears there but didn't auto-fill, the format might be unique.
+    * You can always manually copy the code from the notification and paste it into the "IR Code" box.
 
 ---
-
-Enjoy my work? Help me out for a couple of :beers: or a :coffee:!
-
-[![coffee](https://www.buymeacoffee.com/assets/img/custom_images/black_img.png)](https://yoomoney.ru/to/410019180291197)
+*Based on the original work by [Anonym-tsk](https://github.com/Anonym-tsk).*
